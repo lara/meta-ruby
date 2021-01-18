@@ -1,49 +1,87 @@
-require 'active_support/core_ext/string'
+#!/usr/bin/env ruby
 
 class Thing
- # magic
+  attr_reader :name, :attributes
+
+  def initialize(name)
+    @name = name
+    @attributes = {}
+  end
+
+  def is_a
+    AttributeSetter.new(self)
+  end
+
+  def is_not_a
+    AttributeSetter.new(self, invert: true)
+  end
+
+  def set_attribute(attribute, value)
+    attributes[attribute] = value
+
+  end
+
+  def method_missing(m, *args, &block)
+
+  end
 end
 
-cow = Thing.new('Cow')
-cow.name
+class AttributeSetter
+  def initialize(thing, invert: false)
+    @thing = thing
+    @invert = invert
+  end
+
+  def method_missing(m, *args, &block)
+    @thing.set_attribute(m, @invert ? false : true)
+  end
+end
+
+kaia = Thing.new('kaia')
+kaia.name # => 'kaia'
 
 # can define boolean methods on an instance
-cow.is_a.person
-cow.is_a.woman
-cow.is_not_a.man
+kaia.is_a.person
+kaia.is_a.woman
 
-cow.person? # => true
-cow.man? # => false
+
+kaia.is_not_a.man
+puts kaia.attributes.inspect
+
+kaia.person? # => true
+kaia.man? # => false
+=begin
 
 # can define properties on a per instance level
-cow.is_the.parent_of.boo
-cow.parent_of # => 'boo'
+kaia.is_the.parent_of.cow
+kaia.parent_of # => 'cow'
 
 # can define number of child things
 # when more than 1, an array is created
-cow.has(2).legs
-cow.legs.size # => 2
-cow.legs.first.is_a?(Thing) # => true
+kaia.has(2).legs
+kaia.legs.size # => 2
+kaia.legs.first.is_a?(Thing) # => true
 
 # can define single items
-cow.has(1).head
+kaia.has(1).head
 
-cow.head.is_a?(Thing) # => true
+kaia.head.is_a?(Thing) # => true
 
 # can define number of things in a chainable and natural format
-cow.has(2).arms.each { having(1).hand.having(5).fingers }
+kaia.has(2).arms.each { having(1).hand.having(5).fingers }
 
-cow.arms.first.hand.fingers.size # => 5
+kaia.arms.first.hand.fingers.size # => 5
 
 # can define properties on nested items
-cow.has(1).head.having(2).eyes.each { being_the.color.blue.and_the.shape.round }
+kaia.has(1).head.having(2).eyes.each { being_the.color.blue.and_the.shape.round }
 
 # can define methods
-cow.can.speak('spoke') do |phrase|
+kaia.can.speak('spoke') do |phrase|
   "#{name} says: #{phrase}"
 end
 
-cow.speak("hello") # => "cow says: hello"
+kaia.speak("hello") # => "kaia says: hello"
 
 # if past tense was provided then method calls are tracked
-cow.spoke # => ["cow says: hello"]
+kaia.spoke # => ["kaia says: hello"]
+=end
